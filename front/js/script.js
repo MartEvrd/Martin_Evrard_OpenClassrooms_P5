@@ -1,27 +1,12 @@
-// TODO - REVOIR stockage dans le localStorage 
-
-// Appel de la liste des produits stockés en local
-// window.localStorage.clear();
-// let canapes = window.localStorage.getItem('canapes');
-// // console.log(canapes);
-// if (canapes === null){
-//     /* Si les produits ne sont pas en local :
-//     * 1/ on les récupère de l'API pour les stocker dans la variable canapes
-//     * 2/ On les transmet en local sous la clé "canapés"
-//     */    
-//     const reponse = await fetch("http://localhost:3000/api/products");
-//     canapes = await reponse.json();
-    
-//     window.localStorage.setItem("canapes", reponse);
-// }else{
-//     console.log(canapes);
-//     canapes = JSON.parse(canapes);
-// }
 const reponse = await fetch("http://localhost:3000/api/products");
-const canapes = await reponse.json();
+const produits = await reponse.json();
 
-console.log(canapes);
+console.log(produits);
 
+/**
+ * Affiche les produits de l'API sur la page d'accueil
+ * @param {Array} canapes 
+ */
 function genererProduits(canapes) {
     for (let i = 0; i < canapes.length; i++) {
         const produit = canapes[i];
@@ -58,5 +43,5 @@ function genererProduits(canapes) {
         produitArticle.appendChild(descriptionProduit);
     }
 }
-genererProduits(canapes);
+genererProduits(produits);
 
