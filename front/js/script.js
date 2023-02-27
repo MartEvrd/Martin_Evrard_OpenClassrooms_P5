@@ -44,4 +44,3 @@ function genererProduits(canapes) {
     }
 }
 genererProduits(produits);
-

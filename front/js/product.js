@@ -84,7 +84,7 @@ boutonAjout.addEventListener("click", function() {
         console.log(panier);
         let choixProduit = new newOrder(idProduit, couleur, quantite);
         let existant = false;
-        
+
         // TODO -- A voir pour optimiser la condition sans flag 'existant'        
         for (let i = 0; i < panier.length; i++) {
             if (panier[i].id == idProduit && panier[i].couleur == couleur) {
@@ -104,6 +104,7 @@ boutonAjout.addEventListener("click", function() {
         console.log(panier);
     
         window.localStorage.setItem('panier', JSON.stringify(panier));
+        alert("Produit ajouté au panier");
     } else if(couleur==""){
         alert("Veuillez sélectionner une couleur");
     } else{
