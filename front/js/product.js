@@ -1,21 +1,17 @@
+import { createDom, recupPanier, setAttributes, getProductDetails } from "./functions.js";
+
 // Récupération de l'URL de la page pour en extraire l'id du produit
 const urlPage = new URL(window.location.href);
 const idProduit = urlPage.searchParams.get("id");
 
 // Récupération des informations du produit
-const reponseProduit = await fetch("http://localhost:3000/api/products/"+idProduit);
-const canape = await reponseProduit.json();
+const canape = await getProductDetails(idProduit);
 
-console.log(canape);
 // --- Gestion Image ---
 // Récupération de la Div qui contient l'image du produit
 const imgDiv = document.querySelector(".item__img");
 // Mise en place de l'image produit
-const imgCanape = document.createElement("img");
-imgCanape.src = canape.imageUrl;
-imgCanape.alt = canape.altTxt;
-
-imgDiv.appendChild(imgCanape);
+const imgCanape = createDom("img", "", {src: canape.imageUrl, alt: canape.altTxt}, imgDiv);
 
 // --- Affichage nom produit (Titre) ---
 const nomProduit = canape.name;
@@ -32,7 +28,6 @@ document.getElementById("description").textContent = descriptionProduit;
 // Ajout des options de couleurs
 const optionsCouleurs = document.getElementById("colors");
 const couleursProduit = canape.colors;
-console.log(couleursProduit);
 
 for (let i = 0; i < couleursProduit.length; i++) {
     let newColor = new Option(couleursProduit[i], couleursProduit[i]);
@@ -50,17 +45,6 @@ nbrProduits.addEventListener("change", function() {
         nbrProduits.value = 1;
     }
 })
-
-// TODO
-/* 
-* // OK Tester si une couleur a bien été choisie
-* // OKTester si la quantité est différente de 0
-* // OK Tester si panier existant ou non dans le localStorage
-* // OK Rajouter la quantité si produit déjà présent
-* -> filter pour vérifier si concordance ID + couleur OU test de chaque objet déjà présent
-* // ! A VOIR --> ATTENTION : nbr de produits limité à 100
-*/
-
 class newOrder {
     constructor(id, couleur, quantite) {
         this.id = id;
@@ -68,12 +52,9 @@ class newOrder {
         this.quantite = quantite;
     }
 }
+
 const boutonAjout = document.getElementById("addToCart");
-/**
- * Remplissage du panier au clic sur le bouton d'Ajout
- * @param {string} idProduit
- * @param {Array} tabCart 
- */
+
 boutonAjout.addEventListener("click", function() {
     const idProduit = urlPage.searchParams.get("id");
     const couleur = document.getElementById("colors").value;
@@ -89,8 +70,7 @@ boutonAjout.addEventListener("click", function() {
         for (let i = 0; i < panier.length; i++) {
             if (panier[i].id == idProduit && panier[i].couleur == couleur) {
                 panier[i].quantite += quantite;
-
-                // ! A VOIR SI NECESSAIRE 
+ 
                 if (panier[i].quantite > 100) {
                     panier[i].quantite = 100;
                     alert("Il n'est pas possible de commander plus de 100 produits identiques.")
@@ -102,27 +82,14 @@ boutonAjout.addEventListener("click", function() {
             panier.push(choixProduit);
         }
         console.log(panier);
-    
+
         window.localStorage.setItem('panier', JSON.stringify(panier));
-        alert("Produit ajouté au panier");
+        // TODO Réactiver le message d'ajout dans le panier
+        // alert("Produit ajouté au panier");
+
     } else if(couleur==""){
         alert("Veuillez sélectionner une couleur");
     } else{
         alert("La quantité doit être différente de 0");
     };
 })
-
-export function recupPanier() {
-    let panier = window.localStorage.getItem('panier');
-
-    if (panier === null) {
-        return [];
-    } else{
-        return JSON.parse(panier);
-    }
-}
-
-// créer fonction de récup du panier pour exporter sur la page panier (utilisé plusieurs fois)
-
-// Passage commande : faire un objet des informations saisies
-// Numéro commande passé via l'URL
