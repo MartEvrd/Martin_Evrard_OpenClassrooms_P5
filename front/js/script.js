@@ -1,7 +1,7 @@
+import { createDom } from "./functions.js";
+
 const reponse = await fetch("http://localhost:3000/api/products");
 const produits = await reponse.json();
-
-console.log(produits);
 
 /**
  * Affiche les produits de l'API sur la page d'accueil
@@ -14,33 +14,19 @@ function genererProduits(canapes) {
         const sectionItems = document.querySelector(".items");        
         
         // Création du lien du produit
-        const lienProduit = document.createElement("a");
-        lienProduit.href = "./product.html?id=" + produit._id;
-
+        const lienProduit = createDom("a", "", {href: "./product.html?id=" + produit._id}, sectionItems)
+        
         // Création d'une balise dédiée à un produit
-        const produitArticle = document.createElement("article");
-        produitArticle.dataset.id = i;
+        const produitArticle = createDom("article", "", {"data-id": i}, lienProduit)
 
         // Image du produit
-        const imageProduit = document.createElement("img");
-        imageProduit.src = produit.imageUrl;
-        imageProduit.alt = produit.altTxt;
+        const imageProduit = createDom("img", "", {src: produit.imageUrl, alt: produit.altTxt}, produitArticle)
 
         // Nom du produit
-        const nomProduit = document.createElement("h3");
-        nomProduit.className = "productName";
-        nomProduit.innerText = produit.name;
+        const nomProduit = createDom("h3", produit.name, {class: "productName"}, produitArticle)
         
         // Description du produit
-        const descriptionProduit = document.createElement("p");
-        descriptionProduit.className = "productDescription";
-        descriptionProduit.innerText = produit.description;
-
-        sectionItems.appendChild(lienProduit);
-        lienProduit.appendChild(produitArticle);
-        produitArticle.appendChild(imageProduit);
-        produitArticle.appendChild(nomProduit);
-        produitArticle.appendChild(descriptionProduit);
+        const descriptionProduit = createDom("p", produit.description, {class: "productDescription"}, produitArticle)
     }
 }
 genererProduits(produits);
