@@ -1,12 +1,12 @@
-import { recupPanier, createDom, setAttributes, getProductDetails } from "./functions.js";
+import { recupPanier, createDom, setAttributes, getProductDetails, integerChange, letterChange } from "./functions.js";
 
 // TODO
-/* Si modification de la quantité, mettre le total à jour
-* Fonctionnalité de suppression
-* Analyse des input pour validation du contenu/format
-* Indiquer message d'erreur en cas de problème de saisie
-* Ne pas stocker les prix des articles en local
-*/
+// OK Si modification de la quantité, mettre le total à jour
+// OK Fonctionnalité de suppression
+// OK Analyse des input pour validation du contenu/format
+// Indiquer message d'erreur en cas de problème de saisie
+// OK Ne pas stocker les prix des articles en local
+
 
 
 let panier = recupPanier();
@@ -14,8 +14,9 @@ let panier = recupPanier();
 console.log(panier);
 
 const panierList = document.getElementById("cart__items");
-
-await generateCart(panier);    
+const orderBtn = document.getElementById("order");
+await generateCart(panier);
+    
 
 // EventListener Input quantités
 document.querySelectorAll(".itemQuantity").forEach(inputQuantite => {
@@ -43,6 +44,7 @@ document.querySelectorAll(".itemQuantity").forEach(inputQuantite => {
         window.localStorage.setItem('panier', JSON.stringify(panier));
         majTotalPanier(panier);
     })
+    inputQuantite.addEventListener("keydown", integerChange);
 })
 
 // EventListener Bouton Suppression
@@ -64,11 +66,22 @@ document.querySelectorAll(".deleteItem").forEach(btnSuppr => {
         parentArticle.remove();
 
         if (panier.length === 0) {
-            const emptyCart = createDom("p", "Vous n'avez pour le moment aucun article dans votre panier", {}, panierList);
+            orderBtn.style.visibility = "hidden";
+            const emptyCart = createDom("p", "Vous n'avez pour le moment aucun article dans votre panier.", {}, panierList);
         }
         majTotalPanier(panier);
     })
 })
+
+/* EventListener sur les champs de saisie de Prénom et Nom
+* Permet d'empêcher la saisie de caractères autres que Lettres (min/maj), "-" et espaces */
+// const firstName = document.getElementById("firstName");
+// firstName.addEventListener("keydown", letterChange);
+// const lastName = document.getElementById("lastName");
+// lastName.addEventListener("keydown", letterChange);
+
+orderBtn.addEventListener("click", validateForm);
+
 
 // ---------------------
 /**
@@ -77,8 +90,10 @@ document.querySelectorAll(".deleteItem").forEach(btnSuppr => {
  */
 async function generateCart(panier) {
     if (panier.length === 0) {
-        const emptyCart = createDom("p", "Vous n'avez pour le moment aucun article dans votre panier", {}, panierList);
+        orderBtn.style.visibility = "hidden";
+        const emptyCart = createDom("p", "Vous n'avez pour le moment aucun article dans votre panier.", {}, panierList);
     } else {
+        orderBtn.style.visibility = "visible";
         for (let i = 0; i < panier.length; i++) {
             const idProduit = panier[i].id;
             const couleur = panier[i].couleur;
@@ -112,7 +127,7 @@ async function generateCart(panier) {
             const quantiteInput = createDom(
                 "input",
                 "",
-                {type: "number", class: "itemQuantity", min: 1, max: 100, value: quantite},
+                {type: "number", class: "itemQuantity", min: 1, max: 100, value: quantite, pattern: "\d"},
                 quantiteDiv);
     
             // Suppression
@@ -141,4 +156,74 @@ async function majTotalPanier(panier) {
 
     totalQuantite.innerText = totalArticles;
     totalPrix.innerText = sommePanier;
+}
+
+function validateForm(event) {
+    // Définition des RegEx des champs de saisie
+    const lettersOnly = /^[a-zA-Z][a-zA-Z- ]+$/;
+    // ! Pas vraiment de formalisme pour les addresses, qui peuvent comporter des numéros ou non, des espaces, tirets, etc
+    // ! Vraiment utile de créer un RegEx pour l'adresse ?
+    const addressOnly = /^\d{0,} ?[\w- \']+$/
+    const zipCityOnly = /^[0-9]{5} [a-zA-Z- ]+$/;
+    const mailOnly = /^[\w\d][\w\d-_\.]+@[\w]+\.[a-z]{2,8}\.?[a-z]{0,8}$/
+
+    const firstName = document.getElementById("firstName").value;
+    const firstNameErr = document.getElementById("firstNameErrorMsg");
+    firstNameErr.innerText=""
+    const lastName = document.getElementById("lastName").value;
+    const lastNameErr = document.getElementById("lastNameErrorMsg");
+    lastNameErr.innerText=""
+
+    const address = document.getElementById("address").value;
+    const addressErr = document.getElementById("addressErrorMsg");
+    addressErr.innerText=""
+
+    const city = document.getElementById("city").value;
+    const cityErr = document.getElementById("cityErrorMsg");
+    cityErr.innerText=""
+
+    const email = document.getElementById("email").value;
+    const emailErr = document.getElementById("emailErrorMsg");
+    emailErr.innerText=""
+
+
+    if (firstName == "") {
+        firstNameErr.innerText="Veuillez renseigner ce champ."
+        event.preventDefault();
+    } else if (lettersOnly.test(firstName) == false) {
+        firstNameErr.innerText="Vous ne pouvez saisir que des lettres, des \"-\" ou des espaces"
+        event.preventDefault();
+    }
+    
+    if (lastName == "") {
+        lastNameErr.innerText="Veuillez renseigner ce champ."
+        event.preventDefault();
+    } else if (lettersOnly.test(lastName) == false) {
+        lastNameErr.innerText="Vous ne pouvez saisir que des lettres, des \"-\" ou des espaces"
+        event.preventDefault();
+    }
+
+    if (address == "") {
+        addressErr.innerText="Veuillez renseigner ce champ."
+        event.preventDefault();
+    // } else if (addressOnly.test(address) == false) {
+    //     addressErr.innerText=""
+    //     event.preventDefault();
+    }
+
+    if (city == "") {
+        cityErr.innerText="Veuillez renseigner ce champ."
+        event.preventDefault();
+    } else if (zipCityOnly.test(city) == false) {
+        cityErr.innerText="La ville doit être saisie selon le format suivant : 75000 PARIS"
+        event.preventDefault();
+    }
+    
+    if (email == "") {
+        emailErr.innerText="Veuillez renseigner ce champ."
+        event.preventDefault();
+    } else if (mailOnly.test(email) == false) {
+        emailErr.innerText="Le mail doit être saisi selon le format suivant : monsieur.dupont1@gmail.com"
+        event.preventDefault();
+    }
 }

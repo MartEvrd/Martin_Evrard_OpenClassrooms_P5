@@ -63,3 +63,39 @@ export async function getProductDetails (idProduit) {
     const reponseProduit = await fetch("http://localhost:3000/api/products/"+idProduit);
     return await reponseProduit.json();
 }
+
+const RxPosInteger = /^\+?\d/;
+const RxLetters = /^[a-zA-Z- ]/;
+/**
+ * -> Fonction de gestion des saisies de valeures numériques dans les integer de type Number
+ * -> Permet d'empêcher toute saisie autre qu'un nombre entier positif
+ * @param {Event} event Event est l'événement transmis via l'EventListener de l'input qui fait appel à la fonction.
+ */
+
+export function integerChange(event) {
+    if (
+    (event.key.length > 1) || //Permet de tester si la touche enfoncée renvoie plus d'1 caractère (pour les retours à la ligne, flèche arrière, touche entrée, etc)
+    RxPosInteger.test(event.key) // Test si la touche saisie est conforme au pattern RxPosInteger
+    ) {
+        return;
+    } else {
+        event.preventDefault();
+    }
+};
+
+/**
+ * -> Fonction de gestion des saisies de textes en lettres uniquement
+ * -> Permet d'empêcher toute saisie autre qu'une lettre minuscule/majuscule ou qu'un "-".
+ * @param {Event} event Event est l'événement transmis via l'EventListener de l'input qui fait appel à la fonction.
+ */
+
+export function letterChange(event) {
+    if (
+    (event.key.length > 1) || //Permet de tester si la touche enfoncée renvoie plus d'1 caractère (pour les retours à la ligne, flèche arrière, touche entrée, etc)
+    RxLetters.test(event.key) // Test si la touche saisie est conforme au pattern const RxLetters
+    ) {
+        return;
+    } else {
+        event.preventDefault();
+    }
+};
