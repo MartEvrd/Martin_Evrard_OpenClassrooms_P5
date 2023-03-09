@@ -4,7 +4,7 @@ import { recupPanier, createDom, setAttributes, getProductDetails, integerChange
 // OK Si modification de la quantité, mettre le total à jour
 // OK Fonctionnalité de suppression
 // OK Analyse des input pour validation du contenu/format
-// Indiquer message d'erreur en cas de problème de saisie
+// OK Indiquer message d'erreur en cas de problème de saisie
 // OK Ne pas stocker les prix des articles en local
 
 
@@ -15,6 +15,16 @@ console.log(panier);
 
 const panierList = document.getElementById("cart__items");
 const orderBtn = document.getElementById("order");
+class newContact {
+    constructor(firstName, lastName, address, city, email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.city = city;
+        this.email = email;
+    }
+}
+
 await generateCart(panier);
     
 
@@ -73,15 +83,9 @@ document.querySelectorAll(".deleteItem").forEach(btnSuppr => {
     })
 })
 
-/* EventListener sur les champs de saisie de Prénom et Nom
-* Permet d'empêcher la saisie de caractères autres que Lettres (min/maj), "-" et espaces */
-// const firstName = document.getElementById("firstName");
-// firstName.addEventListener("keydown", letterChange);
-// const lastName = document.getElementById("lastName");
-// lastName.addEventListener("keydown", letterChange);
-
-orderBtn.addEventListener("click", validateForm);
-
+// EventListener Validation Commande
+const formContact = document.querySelector(".cart__order__form");
+formContact.addEventListener("submit", validateForm)
 
 // ---------------------
 /**
@@ -158,72 +162,114 @@ async function majTotalPanier(panier) {
     totalPrix.innerText = sommePanier;
 }
 
-function validateForm(event) {
+/**
+ * -> Fonction de gestion de validation des saisies du formulaire de commande
+ * @param {event} event Event récupère l'événement de click sur le bouton d'envoi du formulaire
+ */
+async function validateForm(event) {
+    event.preventDefault();
+    let flagValid = [];
     // Définition des RegEx des champs de saisie
-    const lettersOnly = /^[a-zA-Z][a-zA-Z- ]+$/;
-    // ! Pas vraiment de formalisme pour les addresses, qui peuvent comporter des numéros ou non, des espaces, tirets, etc
-    // ! Vraiment utile de créer un RegEx pour l'adresse ?
-    const addressOnly = /^\d{0,} ?[\w- \']+$/
-    const zipCityOnly = /^[0-9]{5} [a-zA-Z- ]+$/;
-    const mailOnly = /^[\w\d][\w\d-_\.]+@[\w]+\.[a-z]{2,8}\.?[a-z]{0,8}$/
-
-    const firstName = document.getElementById("firstName").value;
-    const firstNameErr = document.getElementById("firstNameErrorMsg");
-    firstNameErr.innerText=""
-    const lastName = document.getElementById("lastName").value;
-    const lastNameErr = document.getElementById("lastNameErrorMsg");
-    lastNameErr.innerText=""
-
-    const address = document.getElementById("address").value;
-    const addressErr = document.getElementById("addressErrorMsg");
-    addressErr.innerText=""
-
-    const city = document.getElementById("city").value;
-    const cityErr = document.getElementById("cityErrorMsg");
-    cityErr.innerText=""
-
-    const email = document.getElementById("email").value;
-    const emailErr = document.getElementById("emailErrorMsg");
-    emailErr.innerText=""
-
-
-    if (firstName == "") {
-        firstNameErr.innerText="Veuillez renseigner ce champ."
-        event.preventDefault();
-    } else if (lettersOnly.test(firstName) == false) {
-        firstNameErr.innerText="Vous ne pouvez saisir que des lettres, des \"-\" ou des espaces"
-        event.preventDefault();
+    const lettersOnly = {
+        pattern: /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ- \']+$/,
+        errMsg: "Vous ne pouvez saisir que des lettres, des tirets, des apostrophes ou des espaces"
+    };
+    const addressOnly = {
+        pattern: /\d{0,} ?[\dA-Za-zÀ-ÖØ-öø-ÿ- \']+$/,
+        errMsg: "Veuillez entrer une adresse valide"
     }
+    // ! Remettre le bon pattern une fois les tests terminés   
+    const zipCityOnly = {
+        pattern: /^[A-Za-zÀ-ÖØ-öø-ÿ- ]+$/,
+        // pattern: /^[0-9]{5} [A-Za-zÀ-ÖØ-öø-ÿ- ]+$/,
+        errMsg: "La ville doit être saisie selon le format suivant : 75000 PARIS"
+    }  
+    // ! Voir pour trouver une nomenclature correcte sur la partie avant le "@"
+    const mailOnly = {
+        pattern: /^[\w][\w-_\.]+@[\w]+\.[a-z]{2,8}\.?[a-z]{0,8}$/,
+        errMsg: "Le mail doit être saisi selon le format suivant : monsieur.dupont1@gmail.com"
+    }
+
+    flagValid.push(validInput("firstName", lettersOnly));
+    flagValid.push(validInput("lastName", lettersOnly));
+    flagValid.push(validInput("address", addressOnly));
+    flagValid.push(validInput("city", zipCityOnly));
+    flagValid.push(validInput("email", mailOnly));
+
+    if (!flagValid.includes(false)) {
+        await getOrderParams();
+    }
+}
+
+/**
+ * -> Fonction de test de conformité sur les champs d'input, en fonction d'une Regex communiquée
+ * @param {string} inputName Transmettre le nom de l'ID HTML utilisé pour identifier l'input et récupérer sa valeur ainsi que son message d'erreur
+ * @param {pattern} inputRex Transmettre la RegEx à appliquer au contrôle (sous format de pattern) 
+ * @returns {bool} flag : True si l'input est conforme / False s'il ne l'est pas
+ */
+function validInput(inputName, inputRex) {
+    const input = document.getElementById(inputName);
+    const saisieVal = input.value;
+    const saisieErr = document.getElementById(inputName + "ErrorMsg");
+    let flag = true;
+    saisieErr.innerText="";
+
+    if (!input.checkValidity()) {
+        saisieErr.innerText="Veuillez renseigner ce champ.";
+        return flag = false;
+    } else if (inputRex["pattern"].test(saisieVal) == false) {
+        saisieErr.innerText=inputRex["errMsg"];
+        return flag = false;
+    } else {
+        return flag;
+    }
+}
+
+/**
+ * -> Fonction de récupération des informations du client pour création de l'objet à transmettre à l'API
+ */
+async function getOrderParams(){
+    const formContact = document.querySelector(".cart__order__form");
+    const formData = new FormData(formContact);
+
+    const contact = new newContact(
+        formData.get("firstName"), 
+        formData.get("lastName"), 
+        formData.get("address"), 
+        formData.get("city"), 
+        formData.get("email")
+    );
+    const products = toOrderCart(panier);
+    const orderRequest = {
+        "contact": contact,
+        "products": products
+    }
+    console.log(JSON.stringify(orderRequest));
+
+    let response = await fetch("http://localhost:3000/api/products/order", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderRequest)
+    });
     
-    if (lastName == "") {
-        lastNameErr.innerText="Veuillez renseigner ce champ."
-        event.preventDefault();
-    } else if (lettersOnly.test(lastName) == false) {
-        lastNameErr.innerText="Vous ne pouvez saisir que des lettres, des \"-\" ou des espaces"
-        event.preventDefault();
-    }
+    let result = await response.json();
+    const orderId = result.orderId;
+    window.open("./confirmation.html?id="+orderId, "_self");
+}
 
-    if (address == "") {
-        addressErr.innerText="Veuillez renseigner ce champ."
-        event.preventDefault();
-    // } else if (addressOnly.test(address) == false) {
-    //     addressErr.innerText=""
-    //     event.preventDefault();
+/**
+ * -> Fonction de création d'un Array contenant les ID des produits du panier
+ * @param {Object} panier Panier disponible sous le localStorage.
+ * @returns {array} Retourne le Array newCart, contenant le nouveau panier
+ */
+function toOrderCart (panier) {
+    let newCart = [];
+    for (let i = 0; i < panier.length; i++) {
+        if (!newCart.includes(panier[i].id)) {
+            newCart.push(panier[i].id);
+        }
     }
-
-    if (city == "") {
-        cityErr.innerText="Veuillez renseigner ce champ."
-        event.preventDefault();
-    } else if (zipCityOnly.test(city) == false) {
-        cityErr.innerText="La ville doit être saisie selon le format suivant : 75000 PARIS"
-        event.preventDefault();
-    }
-    
-    if (email == "") {
-        emailErr.innerText="Veuillez renseigner ce champ."
-        event.preventDefault();
-    } else if (mailOnly.test(email) == false) {
-        emailErr.innerText="Le mail doit être saisi selon le format suivant : monsieur.dupont1@gmail.com"
-        event.preventDefault();
-    }
+    return newCart
 }

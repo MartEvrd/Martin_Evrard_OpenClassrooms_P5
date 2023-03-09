@@ -44,9 +44,9 @@ export function setAttributes(element, text="", attributes) {
 
 /**
  * -> Fonction de suppression de tous les éléments enfants d'un parent dans le DOM
- * @param {HTMLElement} parent  indiquant le nom de la classe (précédée d'un ".") ou de l'ID (précédé d'un "#") parent duquel on souhaite retirer tous les enfants dans le DOM.
+ * @param {string} parent  indiquant le nom de la classe (précédée d'un ".") ou de l'ID (précédé d'un "#") parent duquel on souhaite retirer tous les enfants dans le DOM.
  */
-function deleteChilds (parent) {
+export function deleteChilds (parent) {
     const parentElement = document.querySelector(parent);
     let firstChild = parentElement.firstElementChild;
     while (firstChild) {

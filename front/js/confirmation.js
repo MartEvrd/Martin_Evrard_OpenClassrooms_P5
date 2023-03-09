@@ -1,2 +1,17 @@
-// Passage commande : faire un objet des informations saisies
-// Numéro commande passé via l'URL
+import { createDom, deleteChilds } from "./functions.js";
+
+const urlPage = new URL(window.location.href);
+const orderId = urlPage.searchParams.get("id");
+
+const spanId = document.getElementById("orderId");
+if (orderId != null) {
+    spanId.innerText = orderId;
+} else {
+    const divConfirmation = document.querySelector(".confirmation");
+    deleteChilds(".confirmation");
+    const errMsg = createDom(
+        "p", 
+        "ERREUR - Aucune commande n'a été passée.\nRendez-vous sur le store pour effectuer vos achats.",
+        "",
+        divConfirmation);
+}
