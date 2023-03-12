@@ -1,7 +1,12 @@
-import { createDom, deleteChilds } from "./functions.js";
+import { recupPanier, createDom, deleteChilds } from "./functions.js";
 
 const urlPage = new URL(window.location.href);
 const orderId = urlPage.searchParams.get("id");
+
+let panier = recupPanier();
+if (panier.length != 0) {
+    localStorage.clear();
+}
 
 const spanId = document.getElementById("orderId");
 if (orderId != null) {

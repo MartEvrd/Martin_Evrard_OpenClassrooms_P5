@@ -62,11 +62,9 @@ boutonAjout.addEventListener("click", function() {
 
     if (couleur != "" && quantite >0) {
         let panier = recupPanier();
-        console.log(panier);
         let choixProduit = new newOrder(idProduit, couleur, quantite);
         let existant = false;
-
-        // TODO -- A voir pour optimiser la condition sans flag 'existant'        
+       
         for (let i = 0; i < panier.length; i++) {
             if (panier[i].id == idProduit && panier[i].couleur == couleur) {
                 panier[i].quantite += quantite;
@@ -81,11 +79,9 @@ boutonAjout.addEventListener("click", function() {
         if (existant == false) {
             panier.push(choixProduit);
         }
-        console.log(panier);
 
         window.localStorage.setItem('panier', JSON.stringify(panier));
-        // TODO Réactiver le message d'ajout dans le panier
-        // alert("Produit ajouté au panier");
+        alert("Produit ajouté au panier");
 
     } else if(couleur==""){
         alert("Veuillez sélectionner une couleur");

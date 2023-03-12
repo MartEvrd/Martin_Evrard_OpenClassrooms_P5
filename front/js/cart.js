@@ -1,17 +1,6 @@
 import { recupPanier, createDom, setAttributes, getProductDetails, integerChange, letterChange } from "./functions.js";
 
-// TODO
-// OK Si modification de la quantité, mettre le total à jour
-// OK Fonctionnalité de suppression
-// OK Analyse des input pour validation du contenu/format
-// OK Indiquer message d'erreur en cas de problème de saisie
-// OK Ne pas stocker les prix des articles en local
-
-
-
 let panier = recupPanier();
-
-console.log(panier);
 
 const panierList = document.getElementById("cart__items");
 const orderBtn = document.getElementById("order");
@@ -27,7 +16,6 @@ class newContact {
 
 await generateCart(panier);
     
-
 // EventListener Input quantités
 document.querySelectorAll(".itemQuantity").forEach(inputQuantite => {
     inputQuantite.addEventListener("change", async function() {
@@ -64,8 +52,6 @@ document.querySelectorAll(".deleteItem").forEach(btnSuppr => {
         const idProduit = parentArticle.dataset.id;
         const colorProduit = parentArticle.dataset.color;
 
-        console.log(idProduit + " " + colorProduit);
-        console.log(panier);
         for (let i = 0; i < panier.length; i++){
             if (panier[i].id == idProduit && panier[i].couleur == colorProduit) {
                 panier.splice(i,1);
@@ -87,7 +73,7 @@ document.querySelectorAll(".deleteItem").forEach(btnSuppr => {
 const formContact = document.querySelector(".cart__order__form");
 formContact.addEventListener("submit", validateForm)
 
-// ---------------------
+// -------  FONCTIONS LOCALES  --------------
 /**
  * -> Fonction d'affichage du panier sur la base des éléments ajoutés/supprimés/modifiés dans le localStorage
  * @param {Array} panier Tableau regroupant les produits ajoutés au panier (récupéré via le LocalStorage) 
@@ -178,13 +164,10 @@ async function validateForm(event) {
         pattern: /\d{0,} ?[\dA-Za-zÀ-ÖØ-öø-ÿ- \']+$/,
         errMsg: "Veuillez entrer une adresse valide"
     }
-    // ! Remettre le bon pattern une fois les tests terminés   
     const zipCityOnly = {
-        pattern: /^[A-Za-zÀ-ÖØ-öø-ÿ- ]+$/,
-        // pattern: /^[0-9]{5} [A-Za-zÀ-ÖØ-öø-ÿ- ]+$/,
+        pattern: /^[0-9]{5} [A-Za-zÀ-ÖØ-öø-ÿ- ]+$/,
         errMsg: "La ville doit être saisie selon le format suivant : 75000 PARIS"
     }  
-    // ! Voir pour trouver une nomenclature correcte sur la partie avant le "@"
     const mailOnly = {
         pattern: /^[\w][\w-_\.]+@[\w]+\.[a-z]{2,8}\.?[a-z]{0,8}$/,
         errMsg: "Le mail doit être saisi selon le format suivant : monsieur.dupont1@gmail.com"
@@ -244,7 +227,6 @@ async function getOrderParams(){
         "contact": contact,
         "products": products
     }
-    console.log(JSON.stringify(orderRequest));
 
     let response = await fetch("http://localhost:3000/api/products/order", {
         method: 'POST',
